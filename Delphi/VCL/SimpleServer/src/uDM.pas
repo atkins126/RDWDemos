@@ -3,22 +3,37 @@ unit uDM;
 interface
 
 uses
-  System.SysUtils, System.Classes, uRESTDWAbout, uRESTDWServerEvents,
-  uRESTDWDatamodule,
-  uRESTDWParams, uRESTDWConsts, uRESTDWComponentBase, FireDAC.Stan.Intf,
-  FireDAC.Stan.Option, FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf,
-  FireDAC.Stan.Def, FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys,
-  FireDAC.Phys.PG, FireDAC.Phys.PGDef, FireDAC.VCLUI.Wait, Data.DB,
-  FireDAC.Comp.Client, uRESTDWBasic, uRestDWDriverFD, uRESTDWBasicDB,
-  uRESTDWServerContext;
+  // uses gerais
+  System.SysUtils, System.Classes, Data.DB,
+
+  // uses RDW
+  uRESTDWAbout, uRESTDWServerEvents, uRESTDWDatamodule, uRESTDWParams,
+  uRESTDWConsts, uRESTDWComponentBase, uRESTDWBasic, uRESTDWBasicDB,
+  uRESTDWServerContext, uRestDWDriverFD, uRESTDWDriverZEOS,
+
+  // uses FireDAC
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Error, FireDAC.UI.Intf,
+  FireDAC.Phys.Intf, FireDAC.Stan.Def, FireDAC.Stan.Pool, FireDAC.Stan.Async,
+  FireDAC.Phys, FireDAC.Phys.PG, FireDAC.Phys.PGDef, FireDAC.VCLUI.Wait,
+  FireDAC.Comp.Client, FireDAC.DApt, FireDAC.Phys.SQLite,
+  FireDAC.Phys.SQLiteDef, FireDAC.Stan.ExprFuncs,
+  FireDAC.Phys.SQLiteWrapper.Stat,
+
+  // uses Zeos
+  ZAbstractConnection, ZConnection
+
+    ;
 
 type
   TDM = class(TServerMethodDataModule)
     RESTDWServerEvents1: TRESTDWServerEvents;
-    RESTDWPoolerDB1: TRESTDWPoolerDB;
-    RESTDWDriverFD1: TRESTDWDriverFD;
+    PoolerDBFireDAC: TRESTDWPoolerDB;
     FDConnection1: TFDConnection;
     RESTDWServerContext1: TRESTDWServerContext;
+    PoolerDBZeos: TRESTDWPoolerDB;
+    RDWDriverFD: TRESTDWDriverFD;
+    RDWDriverZeos: TRESTDWDriverZeos;
+    ZConnection1: TZConnection;
     procedure teste(var Params: TRESTDWParams; var Result: string;
       const RequestType: TRequestType; var StatusCode: Integer;
       RequestHeader: TStringList);
@@ -31,6 +46,7 @@ type
     procedure relatorio(const Params: TRESTDWParams; var ContentType: string;
       const Result: TMemoryStream; const RequestType: TRequestType;
       var StatusCode: Integer);
+    procedure ServerMethodDataModuleCreate(Sender: TObject);
   private
     { Private declarations }
   public
@@ -81,6 +97,23 @@ procedure TDM.relatorio(const Params: TRESTDWParams; var ContentType: string;
 begin
   ContentType := GetMIMEType('.\relatorio.pdf');
   Result.LoadFromFile('.\relatorio.pdf');
+end;
+
+procedure TDM.ServerMethodDataModuleCreate(Sender: TObject);
+begin
+  // configurando FireDAC Connection
+  FDConnection1.Params.Clear;
+  FDConnection1.DriverName := 'SQLite';
+  FDConnection1.Params.Add('Database=' + ExtractFilePath(ParamStr(0)) +
+    'employee.db');
+  FDConnection1.Params.Add('LockingMode=normal');
+
+  // configurando Zeos Connection
+  ZConnection1.Properties.Clear;
+  ZConnection1.Protocol := 'sqlite-3';
+  ZConnection1.Database := ExtractFilePath(ParamStr(0)) + 'employee.db';
+  ZConnection1.LibraryLocation := ExtractFilePath(ParamStr(0)) + 'sqlite3.dll';
+  ZConnection1.Properties.Add('LockingMode=normal');
 end;
 
 procedure TDM.teste(var Params: TRESTDWParams; var Result: string;
