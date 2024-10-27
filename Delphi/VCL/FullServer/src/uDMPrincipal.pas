@@ -10,17 +10,16 @@ USES
   FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Error, FireDAC.Phys.Intf,
   FireDAC.Stan.Def, FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys,
   FireDAC.Phys.FB, FireDAC.Comp.Client, FireDAC.Comp.UI, FireDAC.Phys.IBBase,
-  FireDAC.Stan.StorageJSON, FireDAC.Phys.MSSQLDef, FireDAC.Phys.ODBCBase,
-  FireDAC.Phys.MSSQL, uRESTDWConsts, uRESTDWServerEvents, FireDAC.Stan.Param,
+  FireDAC.Stan.StorageJSON, FireDAC.Phys.ODBCBase,
+  uRESTDWConsts, uRESTDWServerEvents, FireDAC.Stan.Param,
   FireDAC.DatS, FireDAC.Dapt.Intf, FireDAC.Comp.DataSet, FireDAC.Phys.MySQLDef,
   FireDAC.Phys.MySQL, FireDAC.Phys.PGDef, FireDAC.Phys.PG, FireDAC.Moni.Base,
-  FireDAC.Moni.RemoteClient, FireDAC.Phys.ODBCDef, FireDAC.Phys.ODBC,
-  FireDAC.Stan.StorageBin,
-
+  FireDAC.Moni.RemoteClient, FireDAC.Stan.StorageBin,
   uRESTDWDataUtils,
   uRESTDWDatamodule, uRESTDWMassiveBuffer, uRESTDWJSONObject, uRESTDWAbout,
   uRESTDWServerContext, uRESTDWBasicDB, uRESTDWParams, uRESTDWBasicTypes,
-  uRESTDWTools, uRestDWDriverFD, uRESTDWBasic, uRESTDWComponentBase;
+  uRESTDWTools, uRESTDWBasic, uRESTDWMimeTypes,
+  uPrincipal, uRESTDWDriverBase, uRESTDWFireDACDriver;
 
 Const
   WelcomeSample = True;
@@ -33,17 +32,15 @@ TYPE
     FDPhysFBDriverLink1: TFDPhysFBDriverLink;
     FDStanStorageJSONLink1: TFDStanStorageJSONLink;
     FDGUIxWaitCursor1: TFDGUIxWaitCursor;
-    FDPhysMSSQLDriverLink1: TFDPhysMSSQLDriverLink;
     FDTransaction1: TFDTransaction;
     FDQuery1: TFDQuery;
     FDPhysPgDriverLink1: TFDPhysPgDriverLink;
     FDMoniRemoteClientLink1: TFDMoniRemoteClientLink;
-    FDPhysODBCDriverLink1: TFDPhysODBCDriverLink;
     FDQuery2: TFDQuery;
     FDQLogin: TFDQuery;
     FDPhysMySQLDriverLink1: TFDPhysMySQLDriverLink;
-    RESTDWDriverFD1: TRESTDWDriverFD;
     RESTDWServerEvents: TRESTDWServerEvents;
+    RESTDWFireDACDriver1: TRESTDWFireDACDriver;
     PROCEDURE Server_FDConnectionBeforeConnect(Sender: TObject);
     PROCEDURE Server_FDConnectionError(ASender, AInitiator: TObject;
       VAR AException: Exception);
@@ -108,12 +105,10 @@ TYPE
       (const Params: TRESTDWParams; var ContentType: string;
       const Result: TMemoryStream; const RequestType: TRequestType;
       var StatusCode: Integer);
-    procedure RDWSEDadosEventshelloworldReplyEventByType
-      (var Params: TRESTDWParams; var Result: string;
-      const RequestType: TRequestType; var StatusCode: Integer;
-      RequestHeader: TStringList);
-    procedure RESTDWServerEventsEventsservertimeReplyEvent
-      (var Params: TRESTDWParams; var Result: string);
+    procedure RESTDWServerEventsEventshelloworldReplyEvent(
+      var Params: TRESTDWParams; const Result: TStringList);
+    procedure RESTDWServerEventsEventsservertimeReplyEvent(
+      var Params: TRESTDWParams; const Result: TStringList);
   PRIVATE
     { Private declarations }
     vIDVenda: Integer;
@@ -133,15 +128,12 @@ IMPLEMENTATION
 {%CLASSGROUP 'Vcl.Controls.TControl'}
 {$R *.dfm}
 
-uses
-  uPrincipal;
-
 procedure TDMPrincipal.employeeReplyEvent(var Params: TRESTDWParams;
   dJsonMode: TDataMode; Var Result: String);
 Var
-  JSONValue: TJSONValue;
+  JSONValue: TRESTDWJSONValue;
 begin
-  JSONValue := TJSONValue.Create;
+  JSONValue := TRESTDWJSONValue.Create;
   Try
     FDQuery1.Close;
     FDQuery1.SQL.Clear;
@@ -187,9 +179,9 @@ end;
 procedure TDMPrincipal.dwcrEmployeeItemsdatatableRequestExecute
   (const Params: TRESTDWParams; var ContentType, Result: string);
 Var
-  JSONValue: TJSONValue;
+  JSONValue: TRESTDWJSONValue;
 begin
-  JSONValue := TJSONValue.Create;
+  JSONValue := TRESTDWJSONValue.Create;
   Try
     FDQuery1.Close;
     FDQuery1.SQL.Clear;
@@ -288,7 +280,7 @@ begin
     Begin
       Try
         Result.LoadFromFile(vFileName);
-        ContentType := GetMIMEType(vFileName);
+        ContentType := TRESTDWMIMEType.GetMIMEType(vFileName);
       Finally
       End;
     End;
@@ -399,11 +391,11 @@ end;
 procedure TDMPrincipal.DWServerEvents1EventsloaddataseteventReplyEvent
   (var Params: TRESTDWParams; var Result: string);
 Var
-  JSONValue: TJSONValue;
+  JSONValue: TRESTDWJSONValue;
 BEGIN
   If Params.ItemsString['sql'] <> Nil Then
   Begin
-    JSONValue := TJSONValue.Create;
+    JSONValue := TRESTDWJSONValue.Create;
     Try
       FDQuery1.Close;
       FDQuery1.SQL.Clear;
@@ -462,23 +454,6 @@ Begin
   vTempClient.Free;
 End;
 
-procedure TDMPrincipal.RDWSEDadosEventshelloworldReplyEventByType
-  (var Params: TRESTDWParams; var Result: string;
-  const RequestType: TRequestType; var StatusCode: Integer;
-  RequestHeader: TStringList);
-begin
-  If Params.ItemsString['temp'].AsString <> '' Then
-    Result := 'Hello World RDW Refactor...' + sLineBreak +
-      Format('Param %s = %s', ['temp', Params.ItemsString['temp'].AsString])
-  Else
-  Begin
-    Result := 'Hello World RDW Refactor...' + sLineBreak +
-      Format('Params em URI Param 0 = %s, Param 1 = %s',
-      [Params.ItemsString['temp1'].AsString,
-      Params.ItemsString['temp2'].AsString])
-  End;
-end;
-
 procedure TDMPrincipal.RESTDWDriverFD1PrepareConnection(var ConnectionDefs
   : TConnectionDefs);
 begin
@@ -491,8 +466,23 @@ begin
   ConnectionDefs.Password := 'masterkey';
 end;
 
-procedure TDMPrincipal.RESTDWServerEventsEventsservertimeReplyEvent
-  (var Params: TRESTDWParams; var Result: string);
+procedure TDMPrincipal.RESTDWServerEventsEventshelloworldReplyEvent(
+  var Params: TRESTDWParams; const Result: TStringList);
+begin
+  If Params.ItemsString['temp'].AsString <> '' Then
+    Result.Text := 'Hello World RDW Refactor...' + sLineBreak +
+      Format('Param %s = %s', ['temp', Params.ItemsString['temp'].AsString])
+  Else
+  Begin
+    Result.Text := 'Hello World RDW Refactor...' + sLineBreak +
+      Format('Params em URI Param 0 = %d, Param 1 = %d',
+      [Params.ItemsString['temp1'].AsInteger,
+      Params.ItemsString['temp2'].AsInteger])
+  End;
+end;
+
+procedure TDMPrincipal.RESTDWServerEventsEventsservertimeReplyEvent(
+  var Params: TRESTDWParams; const Result: TStringList);
 begin
   Params.ItemsString['result'].AsDateTime := Now;
 end;

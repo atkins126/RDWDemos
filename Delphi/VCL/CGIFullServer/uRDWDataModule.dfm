@@ -1,13 +1,11 @@
 object RDWDataModule: TRDWDataModule
   Encoding = esUtf8
   OnMassiveProcess = ServerMethodDataModuleMassiveProcess
-  OnUserTokenAuth = ServerMethodDataModuleUserTokenAuth
-  OnGetToken = ServerMethodDataModuleGetToken
   QueuedRequest = False
-  Height = 213
-  Width = 361
+  Height = 387
+  Width = 580
   object RESTDWPoolerDB1: TRESTDWPoolerDB
-    RESTDriver = RESTDWDriverFD1
+    RESTDriver = RESTDWFireDACDriver1
     Compression = True
     Encoding = esUtf8
     StrsTrim = False
@@ -18,12 +16,6 @@ object RDWDataModule: TRDWDataModule
     ParamCreate = True
     Left = 52
     Top = 103
-  end
-  object RESTDWDriverFD1: TRESTDWDriverFD
-    CommitRecords = 100
-    Connection = Server_FDConnection
-    Left = 221
-    Top = 11
   end
   object Server_FDConnection: TFDConnection
     Params.Strings = (
@@ -86,8 +78,20 @@ object RDWDataModule: TRDWDataModule
     IgnoreInvalidParams = False
     Events = <
       item
-        Routes = [crAll]
-        NeedAuthorization = True
+        Routes.All.Active = True
+        Routes.All.NeedAuthorization = False
+        Routes.Get.Active = False
+        Routes.Get.NeedAuthorization = False
+        Routes.Post.Active = False
+        Routes.Post.NeedAuthorization = False
+        Routes.Put.Active = False
+        Routes.Put.NeedAuthorization = False
+        Routes.Patch.Active = False
+        Routes.Patch.NeedAuthorization = False
+        Routes.Delete.Active = False
+        Routes.Delete.NeedAuthorization = False
+        Routes.Option.Active = False
+        Routes.Option.NeedAuthorization = False
         Params = <
           item
             TypeObject = toParam
@@ -117,11 +121,22 @@ object RDWDataModule: TRDWDataModule
         DefaultContentType = 'application/json'
         CallbackEvent = False
         OnlyPreDefinedParams = False
-        OnReplyEvent = RESTDWServerEvents1Eventsdwevent1ReplyEvent
       end
       item
-        Routes = [crAll]
-        NeedAuthorization = True
+        Routes.All.Active = True
+        Routes.All.NeedAuthorization = False
+        Routes.Get.Active = False
+        Routes.Get.NeedAuthorization = False
+        Routes.Post.Active = False
+        Routes.Post.NeedAuthorization = False
+        Routes.Put.Active = False
+        Routes.Put.NeedAuthorization = False
+        Routes.Patch.Active = False
+        Routes.Patch.NeedAuthorization = False
+        Routes.Delete.Active = False
+        Routes.Delete.NeedAuthorization = False
+        Routes.Option.Active = False
+        Routes.Option.NeedAuthorization = False
         Params = <>
         DataMode = dmDataware
         Name = 'helloworld'
@@ -130,7 +145,6 @@ object RDWDataModule: TRDWDataModule
         DefaultContentType = 'application/json'
         CallbackEvent = False
         OnlyPreDefinedParams = False
-        OnReplyEvent = RESTDWServerEvents1EventshelloworldReplyEvent
       end>
     Left = 152
     Top = 120
@@ -140,5 +154,19 @@ object RDWDataModule: TRDWDataModule
     ContextList = <>
     Left = 264
     Top = 120
+  end
+  object RESTDWFireDACDriver1: TRESTDWFireDACDriver
+    Connection = Server_FDConnection
+    ConectionType = dbtFirebird
+    StrsTrim = False
+    StrsEmpty2Null = False
+    StrsTrim2Len = False
+    Compression = False
+    EncodeStringsJSON = False
+    Encoding = esUtf8
+    ParamCreate = True
+    CommitRecords = 100
+    Left = 64
+    Top = 160
   end
 end

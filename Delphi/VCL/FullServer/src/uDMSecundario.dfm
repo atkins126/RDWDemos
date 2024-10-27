@@ -2,13 +2,10 @@ object DMSecundario: TDMSecundario
   OnCreate = ServerMethodDataModuleCreate
   Encoding = esUtf8
   OnMassiveProcess = ServerMethodDataModuleMassiveProcess
-  OnUserTokenAuth = ServerMethodDataModuleUserTokenAuth
-  OnGetToken = ServerMethodDataModuleGetToken
   QueuedRequest = False
   Height = 252
   Width = 328
   object RESTDWPoolerFD: TRESTDWPoolerDB
-    RESTDriver = RESTDWDriverFD1
     Compression = True
     Encoding = esUtf8
     StrsTrim = False
@@ -52,10 +49,6 @@ object DMSecundario: TDMSecundario
     Left = 109
     Top = 62
   end
-  object FDPhysMSSQLDriverLink1: TFDPhysMSSQLDriverLink
-    Left = 82
-    Top = 17
-  end
   object FDTransaction1: TFDTransaction
     Options.AutoStop = False
     Options.DisconnectAction = xdRollback
@@ -75,10 +68,6 @@ object DMSecundario: TDMSecundario
   end
   object FDMoniRemoteClientLink1: TFDMoniRemoteClientLink
     Left = 166
-    Top = 17
-  end
-  object FDPhysODBCDriverLink1: TFDPhysODBCDriverLink
-    Left = 195
     Top = 17
   end
   object FDQuery2: TFDQuery
@@ -103,18 +92,24 @@ object DMSecundario: TDMSecundario
     Left = 110
     Top = 17
   end
-  object RESTDWDriverFD1: TRESTDWDriverFD
-    CommitRecords = 100
-    Connection = Server_FDConnection
-    Left = 56
-    Top = 112
-  end
   object RDWSEDados2: TRESTDWServerEvents
     IgnoreInvalidParams = False
     Events = <
       item
-        Routes = [crAll]
-        NeedAuthorization = True
+        Routes.All.Active = True
+        Routes.All.NeedAuthorization = False
+        Routes.Get.Active = False
+        Routes.Get.NeedAuthorization = False
+        Routes.Post.Active = False
+        Routes.Post.NeedAuthorization = False
+        Routes.Put.Active = False
+        Routes.Put.NeedAuthorization = False
+        Routes.Patch.Active = False
+        Routes.Patch.NeedAuthorization = False
+        Routes.Delete.Active = False
+        Routes.Delete.NeedAuthorization = False
+        Routes.Option.Active = False
+        Routes.Option.NeedAuthorization = False
         Params = <>
         DataMode = dmDataware
         Name = 'helloworld'
@@ -123,7 +118,6 @@ object DMSecundario: TDMSecundario
         DefaultContentType = 'application/json'
         CallbackEvent = False
         OnlyPreDefinedParams = False
-        OnReplyEventByType = RDWSEDadosEventshelloworldReplyEventByType
       end>
     Left = 160
     Top = 168
@@ -133,5 +127,18 @@ object DMSecundario: TDMSecundario
     ContextList = <>
     Left = 152
     Top = 120
+  end
+  object RESTDWFireDACDriver1: TRESTDWFireDACDriver
+    ConectionType = dbtUndefined
+    StrsTrim = False
+    StrsEmpty2Null = False
+    StrsTrim2Len = False
+    Compression = False
+    EncodeStringsJSON = False
+    Encoding = esUtf8
+    ParamCreate = False
+    CommitRecords = 0
+    Left = 64
+    Top = 128
   end
 end
